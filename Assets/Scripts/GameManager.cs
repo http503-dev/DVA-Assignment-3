@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
         videoPlayer.loopPointReached += OnVideoEnd;
 
         ShowMainMenu();
+        StartSimulation();
     }
 
     public void ShowMainMenu()
@@ -67,21 +68,21 @@ public class GameManager : MonoBehaviour
         videoPlayer.Stop();
         sphereRenderer.material = outStillImageMaterial;
         outTouchpoints.SetActive(true);
-        HUDClicks(false);
+        // HUDClicks(false);
 
         // Optionally unlock cursor again if interaction is needed
         // Cursor.lockState = CursorLockMode.None;
         // Cursor.visible = true;
     }
                 
-    void HUDClicks(bool state)
-    {
-        // Disable raycast target on HUD elements
-        foreach (Graphic g in HUDCanvas.GetComponentsInChildren<Graphic>())
-        {
-            g.raycastTarget = state;
-        }
-    }
+    // void HUDClicks(bool state)
+    // {
+    //     // Disable raycast target on HUD elements
+    //     foreach (Graphic g in HUDCanvas.GetComponentsInChildren<Graphic>())
+    //     {
+    //         g.raycastTarget = state;
+    //     }
+    // }
 
     public void ToStudio()
     {

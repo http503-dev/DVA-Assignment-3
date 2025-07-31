@@ -18,10 +18,10 @@ public class CameraController : MonoBehaviour
     {
         HandleLook();
 
-        if (Cursor.lockState == CursorLockMode.Locked && Input.GetMouseButtonDown(0))
-        {
-            TryClickUI();
-        }
+        // if (Cursor.lockState == CursorLockMode.Locked && Input.GetMouseButtonDown(0))
+        // {
+        //     TryClickUI();
+        // }
     }
 
     void HandleLook()
@@ -35,25 +35,25 @@ public class CameraController : MonoBehaviour
 
         transform.eulerAngles = new Vector3(pitch, yaw, 0f);
     }
-
-    void TryClickUI()
-    {
-        PointerEventData pointerData = new PointerEventData(eventSystem);
-        pointerData.position = new Vector2(Screen.width / 2, Screen.height / 2);
-
-        List<RaycastResult> results = new List<RaycastResult>();
-        raycaster.Raycast(pointerData, results);
-
-        foreach (RaycastResult result in results)
-        {
-            Debug.Log(result.gameObject.name);
-            Button button = result.gameObject.GetComponent<Button>();
-            if (button != null)
-            {
-                button.onClick.Invoke();
-                Debug.Log("Clicked on: " + result.gameObject.name);
-                break;
-            }
-        }
-    }
+    //
+    // void TryClickUI()
+    // {
+    //     PointerEventData pointerData = new PointerEventData(eventSystem);
+    //     pointerData.position = new Vector2(Screen.width / 2, Screen.height / 2);
+    //
+    //     List<RaycastResult> results = new List<RaycastResult>();
+    //     raycaster.Raycast(pointerData, results);
+    //
+    //     foreach (RaycastResult result in results)
+    //     {
+    //         Debug.Log(result.gameObject.name);
+    //         Button button = result.gameObject.GetComponent<Button>();
+    //         if (button != null)
+    //         {
+    //             button.onClick.Invoke();
+    //             Debug.Log("Clicked on: " + result.gameObject.name);
+    //             break;
+    //         }
+    //     }
+    // }
 }
