@@ -72,30 +72,31 @@ public class GameManager : MonoBehaviour
         videoPlayer.clip = bassVideoMaterial;
         sphereRenderer.material = VideoMaterial;
         Play360Video();
-        inTouchpoints.SetActive(false);
     }
     public void PlayRhythm(){
         videoPlayer.clip = rhythmVideoMaterial;
         sphereRenderer.material = VideoMaterial;
         Play360Video();
-        inTouchpoints.SetActive(false);
     }
     public void PlayLead(){
         videoPlayer.clip = leadVideoMaterial;
         sphereRenderer.material = VideoMaterial;
         Play360Video();
-        inTouchpoints.SetActive(false);
     }
     public void PlayDrum(){
         videoPlayer.clip = drumVideoMaterial;
         sphereRenderer.material = VideoMaterial;
         Play360Video();
-        inTouchpoints.SetActive(false);
     }
 
     void Play360Video()
     {
         videoPlayer.Play();
+    }
+
+    public void Stop360Video()
+    {
+        videoPlayer.Stop();
     }
 
     void OnVideoEnd(VideoPlayer vp)
