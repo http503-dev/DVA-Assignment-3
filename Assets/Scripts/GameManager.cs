@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -6,18 +7,28 @@ using UnityEngine.Video;
 
 public class GameManager : MonoBehaviour
 {
+    private bool inStudio = false;
     public GameObject crosshair;
     public GameObject mainMenuUI;
-    public Canvas HUDCanvas;
     public GameObject outTouchpoints;
     public GameObject inTouchpoints;
 
+    public GameObject stillImage;
     public GameObject videoSphere;
     public VideoPlayer videoPlayer;
     
     public Material introVideoMaterial;
+    public Material VideoMaterial;
+    public VideoClip bassVideoMaterial;
+    public VideoClip rhythmVideoMaterial;
+    public VideoClip leadVideoMaterial;
+    public VideoClip drumVideoMaterial;
+    
     public Material outStillImageMaterial;
     public Material inStillImageMaterial;
+
+    public CanvasGroup fadeCanvasGroup;
+    public float fadeDuration;
 
     private MeshRenderer sphereRenderer;
 
@@ -29,7 +40,6 @@ public class GameManager : MonoBehaviour
         videoPlayer.loopPointReached += OnVideoEnd;
 
         ShowMainMenu();
-        StartSimulation();
     }
 
     public void ShowMainMenu()
@@ -57,6 +67,31 @@ public class GameManager : MonoBehaviour
         sphereRenderer.material = introVideoMaterial;
         Play360Video();
     }
+    
+    public void PlayBass(){
+        videoPlayer.clip = bassVideoMaterial;
+        sphereRenderer.material = VideoMaterial;
+        Play360Video();
+        inTouchpoints.SetActive(false);
+    }
+    public void PlayRhythm(){
+        videoPlayer.clip = rhythmVideoMaterial;
+        sphereRenderer.material = VideoMaterial;
+        Play360Video();
+        inTouchpoints.SetActive(false);
+    }
+    public void PlayLead(){
+        videoPlayer.clip = leadVideoMaterial;
+        sphereRenderer.material = VideoMaterial;
+        Play360Video();
+        inTouchpoints.SetActive(false);
+    }
+    public void PlayDrum(){
+        videoPlayer.clip = drumVideoMaterial;
+        sphereRenderer.material = VideoMaterial;
+        Play360Video();
+        inTouchpoints.SetActive(false);
+    }
 
     void Play360Video()
     {
@@ -66,29 +101,58 @@ public class GameManager : MonoBehaviour
     void OnVideoEnd(VideoPlayer vp)
     {
         videoPlayer.Stop();
-        sphereRenderer.material = outStillImageMaterial;
-        outTouchpoints.SetActive(true);
-        // HUDClicks(false);
-
-        // Optionally unlock cursor again if interaction is needed
-        // Cursor.lockState = CursorLockMode.None;
-        // Cursor.visible = true;
+        if (!inStudio)
+        {
+            sphereRenderer.material = outStillImageMaterial;
+            outTouchpoints.SetActive(true);
+        }
+        else
+        {
+            sphereRenderer.material = inStillImageMaterial;
+            inTouchpoints.SetActive(true);
+        }
+        
     }
-                
-    // void HUDClicks(bool state)
-    // {
-    //     // Disable raycast target on HUD elements
-    //     foreach (Graphic g in HUDCanvas.GetComponentsInChildren<Graphic>())
-    //     {
-    //         g.raycastTarget = state;
-    //     }
-    // }
 
     public void ToStudio()
     {
         Debug.Log("To Studio");
+        StartCoroutine(FadeToStudio());
+        inStudio = true;
+    }
+
+    public void OpenURL(string url)
+    {
+        Application.OpenURL(url);
+    }
+
+    private IEnumerator FadeToStudio()
+    {
+        // Fade to black
+        yield return StartCoroutine(Fade(0f, 1f, fadeDuration));
+
         sphereRenderer.material = inStillImageMaterial;
         outTouchpoints.SetActive(false);
         inTouchpoints.SetActive(true);
+
+        // Fade back
+        yield return StartCoroutine(Fade(1f, 0f, fadeDuration));
     }
+    
+    private IEnumerator Fade(float startAlpha, float endAlpha, float duration)
+    {
+        float elapsed = 0f;
+        fadeCanvasGroup.alpha = startAlpha;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, endAlpha, t);
+            yield return null;
+        }
+
+        fadeCanvasGroup.alpha = endAlpha;
+    }
+
 }
