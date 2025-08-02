@@ -18,7 +18,7 @@ public class CameraController : MonoBehaviour
     {
         HandleLook();
 
-        if (Input.GetMouseButtonDown(0))
+        if (Cursor.lockState == CursorLockMode.Locked && Input.GetMouseButtonDown(0))
         {
             TryClickUI();
         }
