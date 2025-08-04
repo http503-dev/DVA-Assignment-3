@@ -68,4 +68,37 @@ public class CameraController : MonoBehaviour
             }
         }
     }
+    
+    void HoverUI()
+    {
+        PointerEventData pointerData = new PointerEventData(eventSystem);
+        pointerData.position = new Vector2(Screen.width / 2, Screen.height / 2);
+
+        List<RaycastResult> allResults = new List<RaycastResult>();
+
+        // Find all active GraphicRaycasters
+        GraphicRaycaster[] raycasters = FindObjectsOfType<GraphicRaycaster>();
+        foreach (GraphicRaycaster rc in raycasters)
+        {
+            List<RaycastResult> results = new List<RaycastResult>();
+            rc.Raycast(pointerData, results);
+            allResults.AddRange(results);
+        }
+
+        // Sort results by distance
+        allResults.Sort((a, b) => a.distance.CompareTo(b.distance));
+
+        // Try clicking the first button found
+        foreach (RaycastResult result in allResults)
+        {
+            Debug.Log(result.gameObject.name);
+            Button button = result.gameObject.GetComponent<Button>();
+            if (button != null)
+            { 
+                button.onClick.Invoke();
+                Debug.Log("Clicked on: " + result.gameObject.name);
+                break;
+            }
+        }
+    }
 }

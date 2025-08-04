@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.Video;
+using UnityEditor;
 
 public class GameManager : MonoBehaviour
 {
@@ -24,6 +25,14 @@ public class GameManager : MonoBehaviour
     public VideoClip leadVideoMaterial;
     public VideoClip drumVideoMaterial;
     
+    public AudioSource bgmSource;
+    public AudioSource sfxSource;
+    public AudioClip menuButtonSFX;
+    public AudioClip hotSpotButtonSFX;
+    public float maxVolume = 0.2f;
+
+    private Coroutine fadeCoroutine;
+    
     public Material outStillImageMaterial;
     public Material inStillImageMaterial;
 
@@ -41,6 +50,62 @@ public class GameManager : MonoBehaviour
 
         ShowMainMenu();
     }
+    
+    public void PlayBGM()
+    {
+        if (fadeCoroutine != null)
+            StopCoroutine(fadeCoroutine);
+
+        bgmSource.volume = 0f;
+        if (!bgmSource.isPlaying)
+            bgmSource.Play();
+
+        fadeCoroutine = StartCoroutine(FadeBGMVolume(maxVolume));
+    }
+
+    public void PauseBGM()
+    {
+        if (fadeCoroutine != null)
+            StopCoroutine(fadeCoroutine);
+
+        fadeCoroutine = StartCoroutine(FadeBGMVolume(0f, true));
+    }
+    
+    public void PlayMenuButtonSFX()
+    {
+        if (menuButtonSFX != null)
+        {
+            sfxSource.PlayOneShot(menuButtonSFX);
+        }
+    }
+
+    public void PlayHotSpotButtonSFX()
+    {
+        if (hotSpotButtonSFX != null)
+        {
+            sfxSource.PlayOneShot(hotSpotButtonSFX);
+        }
+    }
+    
+    private IEnumerator FadeBGMVolume(float targetVolume, bool pauseAfter = false)
+    {
+        float startVolume = bgmSource.volume;
+        float elapsed = 0f;
+
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            bgmSource.volume = Mathf.Lerp(startVolume, targetVolume, elapsed / fadeDuration);
+            yield return null;
+        }
+
+        bgmSource.volume = targetVolume;
+
+        if (pauseAfter)
+        {
+            bgmSource.Pause();
+        }
+    }
 
     public void ShowMainMenu()
     {
@@ -56,6 +121,7 @@ public class GameManager : MonoBehaviour
 
     public void StartSimulation()
     {
+        PauseBGM();
         crosshair.SetActive(true);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -91,6 +157,7 @@ public class GameManager : MonoBehaviour
 
     void Play360Video()
     {
+        PauseBGM();
         videoPlayer.Play();
     }
 
@@ -112,7 +179,8 @@ public class GameManager : MonoBehaviour
             sphereRenderer.material = inStillImageMaterial;
             inTouchpoints.SetActive(true);
         }
-        
+
+        PlayBGM();
     }
 
     public void ToStudio()
@@ -156,4 +224,12 @@ public class GameManager : MonoBehaviour
         fadeCanvasGroup.alpha = endAlpha;
     }
 
+    public void QuitGame()
+    {
+        #if UNITY_EDITOR
+        EditorApplication.isPlaying = false;
+        #else
+        Application.Quit();
+        #endif
+    }
 }
