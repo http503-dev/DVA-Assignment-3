@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.Video;
 using UnityEditor;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class GameManager : MonoBehaviour
     public GameObject mainMenuUI;
     public GameObject outTouchpoints;
     public GameObject inTouchpoints;
+    public GameObject objectiveText;
+    public GameObject introText;
 
     public GameObject stillImage;
     public GameObject videoSphere;
@@ -129,6 +132,7 @@ public class GameManager : MonoBehaviour
         mainMenuUI.SetActive(false);
         outTouchpoints.SetActive(false);
         videoSphere.SetActive(true);
+        introText.SetActive(true);
 
         sphereRenderer.material = introVideoMaterial;
         Play360Video();
@@ -158,6 +162,7 @@ public class GameManager : MonoBehaviour
     void Play360Video()
     {
         PauseBGM();
+        objectiveText.SetActive(false);
         videoPlayer.Play();
     }
 
@@ -171,21 +176,23 @@ public class GameManager : MonoBehaviour
         videoPlayer.Stop();
         if (!inStudio)
         {
+            objectiveText.GetComponent<TextMeshProUGUI>().text = "Objective: Into the Studio!";
             sphereRenderer.material = outStillImageMaterial;
             outTouchpoints.SetActive(true);
+            introText.SetActive(false);
+
         }
         else
         {
             sphereRenderer.material = inStillImageMaterial;
             inTouchpoints.SetActive(true);
         }
-
+        objectiveText.SetActive(true);
         PlayBGM();
     }
 
     public void ToStudio()
     {
-        Debug.Log("To Studio");
         StartCoroutine(FadeToStudio());
         inStudio = true;
     }
@@ -206,6 +213,7 @@ public class GameManager : MonoBehaviour
 
         // Fade back
         yield return StartCoroutine(Fade(1f, 0f, fadeDuration));
+        objectiveText.GetComponent<TextMeshProUGUI>().text = "Objective: Explore the Studio";
     }
     
     private IEnumerator Fade(float startAlpha, float endAlpha, float duration)

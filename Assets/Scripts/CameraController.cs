@@ -9,14 +9,17 @@ public class CameraController : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
 
-    [Header("UI Interaction")]
     public GraphicRaycaster raycaster;
     public EventSystem eventSystem;
     public Camera mainCamera;
 
+    private GameObject lastHoveredObject;
+
     void Update()
     {
         HandleLook();
+
+        HoverUI();
 
         if (Cursor.lockState == CursorLockMode.Locked && Input.GetMouseButtonDown(0))
         {
@@ -35,30 +38,16 @@ public class CameraController : MonoBehaviour
 
         transform.eulerAngles = new Vector3(pitch, yaw, 0f);
     }
-    
+
     void TryClickUI()
     {
         PointerEventData pointerData = new PointerEventData(eventSystem);
         pointerData.position = new Vector2(Screen.width / 2, Screen.height / 2);
 
-        List<RaycastResult> allResults = new List<RaycastResult>();
+        List<RaycastResult> allResults = RaycastAllUI(pointerData);
 
-        // Find all active GraphicRaycasters
-        GraphicRaycaster[] raycasters = FindObjectsOfType<GraphicRaycaster>();
-        foreach (GraphicRaycaster rc in raycasters)
-        {
-            List<RaycastResult> results = new List<RaycastResult>();
-            rc.Raycast(pointerData, results);
-            allResults.AddRange(results);
-        }
-
-        // Sort results by distance
-        allResults.Sort((a, b) => a.distance.CompareTo(b.distance));
-
-        // Try clicking the first button found
         foreach (RaycastResult result in allResults)
         {
-            Debug.Log(result.gameObject.name);
             Button button = result.gameObject.GetComponent<Button>();
             if (button != null)
             {
@@ -68,15 +57,53 @@ public class CameraController : MonoBehaviour
             }
         }
     }
-    
+
     void HoverUI()
     {
         PointerEventData pointerData = new PointerEventData(eventSystem);
         pointerData.position = new Vector2(Screen.width / 2, Screen.height / 2);
 
+        List<RaycastResult> allResults = RaycastAllUI(pointerData);
+
+        GameObject currentHoveredObject = null;
+
+        foreach (RaycastResult result in allResults)
+        {
+            if (result.gameObject.GetComponent<Button>() != null)
+            {
+                currentHoveredObject = result.gameObject;
+                break;
+            }
+        }
+
+        if (currentHoveredObject != lastHoveredObject)
+        {
+            if (lastHoveredObject != null)
+            {
+                ExecuteEvents.Execute<IPointerExitHandler>(lastHoveredObject, pointerData, ExecuteEvents.pointerExitHandler);
+
+                Transform oldHoverText = lastHoveredObject.transform.Find("HoverText");
+                if (oldHoverText != null)
+                    oldHoverText.gameObject.SetActive(false);
+            }
+
+            if (currentHoveredObject != null)
+            {
+                ExecuteEvents.Execute<IPointerEnterHandler>(currentHoveredObject, pointerData, ExecuteEvents.pointerEnterHandler);
+
+                Transform newHoverText = currentHoveredObject.transform.Find("HoverText");
+                if (newHoverText != null)
+                    newHoverText.gameObject.SetActive(true);
+            }
+
+            lastHoveredObject = currentHoveredObject;
+        }
+    }
+
+    List<RaycastResult> RaycastAllUI(PointerEventData pointerData)
+    {
         List<RaycastResult> allResults = new List<RaycastResult>();
 
-        // Find all active GraphicRaycasters
         GraphicRaycaster[] raycasters = FindObjectsOfType<GraphicRaycaster>();
         foreach (GraphicRaycaster rc in raycasters)
         {
@@ -85,20 +112,7 @@ public class CameraController : MonoBehaviour
             allResults.AddRange(results);
         }
 
-        // Sort results by distance
         allResults.Sort((a, b) => a.distance.CompareTo(b.distance));
-
-        // Try clicking the first button found
-        foreach (RaycastResult result in allResults)
-        {
-            Debug.Log(result.gameObject.name);
-            Button button = result.gameObject.GetComponent<Button>();
-            if (button != null)
-            { 
-                button.onClick.Invoke();
-                Debug.Log("Clicked on: " + result.gameObject.name);
-                break;
-            }
-        }
+        return allResults;
     }
 }
